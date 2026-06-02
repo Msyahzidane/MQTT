@@ -27,7 +27,7 @@ export function useMqtt({ onLog, onSensorsUpdated }: UseMqttProps) {
     onLog(`Connecting to ${config.label} at ${config.url}`, 'info');
 
     const options: IClientOptions = {
-      clientId: config.clientId + '_' + Math.random().toString(16).substr(2, 8),
+      clientId: config.clientId,
       clean: true,
       connectTimeout: 5000,
       reconnectPeriod: 5000,

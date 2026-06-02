@@ -19,7 +19,7 @@ const BROKERS_PRESETS: BrokerConfig[] = [
   {
     label: 'Cedalo',
     url: 'wss://pf-ja6x4lxt1nt3206ohn7w.cedalo.cloud:443/mqtt',
-    clientId: 'ESP_WEB_Cedalo',
+    clientId: 'Web',
     username: 'Web',
     password: 's',
   },
