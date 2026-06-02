@@ -7,35 +7,11 @@ import { useMqtt } from './useMqtt';
 import { useVoiceCommand } from './useVoice';
 import { BrokerConfig } from './types';
 
-// Pre-defined WebSocket connection parameters for the brokers
-const BROKERS_PRESETS: BrokerConfig[] = [
-  {
-    label: 'Ably',
-    url: typeof window !== 'undefined' ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ably-mqtt-proxy` : 'wss://mqtt.ably.io',
-    clientId: 'ESP_WEB_Ably',
-    username: 'ZyRtEA.EIl0MA',
-    password: 'jN4OHGaVHf2rbXzVYZGSmdfwWQJq7LBrvmP1H_0xkVM',
-    protocolVersion: 4,
-  },
-  {
-    label: 'Cedalo',
-    url: 'wss://pf-ja6x4lxt1nt3206ohn7w.cedalo.cloud:443/mqtt',
-    clientId: 'Web',
-    username: 'Web',
-    password: 's',
-  },
-  {
-    label: 'CloudAMQP',
-    url: 'wss://kingfisher.lmq.cloudamqp.com:443/mqtt',
-    clientId: 'ESP_WEB_AMQP',
-    username: 'jkhntckb:jkhntckb',
-    password: 'kvIQg8q622zZOqLhpTgo_v5M0nB8orRa',
-  },
-];
+// Pre-defined WebSocket connection parameters for the brokers (No longer used directly, strictly using Ably SDK)
+const BROKERS_PRESETS: BrokerConfig[] = [];
 
 export default function App() {
   const { logs, addLog } = useActivityLog();
-  const [selectedBrokerIdx, setSelectedBrokerIdx] = useState(2); // Default to CloudAMQP (Idx 2) because it works robustly on WebSockets
 
   // Latest sensor states for TTS reading
   const sensorsRef = useRef({ suhu: '--', humid: '--' });
@@ -81,25 +57,11 @@ export default function App() {
 
   const { isListening, startListening, speak, supported } = useVoiceCommand(handleVoiceCommand, addLog);
 
-  // Auto-connect to CloudAMQP on mount
+  // Auto-connect to Ably on mount
   useEffect(() => {
-    connect(BROKERS_PRESETS[2]); // Default to CloudAMQP
+    connect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const handleBrokerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const idx = parseInt(e.target.value);
-    
-    // Publish to the CURRENT broker so the ESP knows to switch
-    publish('kontrol/broker', idx.toString());
-
-    // Allow a brief moment for the message to be sent before disconnecting
-    setTimeout(() => {
-      setSelectedBrokerIdx(idx);
-      disconnect();
-      connect(BROKERS_PRESETS[idx]);
-    }, 500);
-  };
 
   const logsEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -124,7 +86,7 @@ export default function App() {
                 <div className="flex items-center gap-1.5">
                   <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></span>
                   <span className={`text-[10px] font-bold ${isConnected ? 'text-emerald-600' : 'text-red-600'}`}>
-                    {isConnected ? 'MQTT CONNECTED' : 'DISCONNECTED'}
+                    {isConnected ? 'ABLY CONNECTED' : 'DISCONNECTED'}
                   </span>
                 </div>
               </div>
@@ -132,22 +94,6 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex flex-col items-end mr-2 hidden sm:flex">
-                <span className="text-xs text-slate-400 uppercase font-bold">Active Broker</span>
-                <div className="flex items-center gap-1">
-                  <select 
-                    title="broker"
-                    value={selectedBrokerIdx}
-                    onChange={handleBrokerChange}
-                    className="bg-transparent text-sm font-semibold text-blue-600 focus:outline-none cursor-pointer"
-                  >
-                    {BROKERS_PRESETS.map((b, i) => (
-                      <option key={i} value={i}>{b.label}</option>
-                    ))}
-                  </select>
-                </div>
-            </div>
-
             <button
               onClick={startListening}
               disabled={!supported || isListening}
