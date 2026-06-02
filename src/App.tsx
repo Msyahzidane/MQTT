@@ -20,7 +20,7 @@ const BROKERS_PRESETS: BrokerConfig[] = [
   {
     label: 'Cedalo',
     url: 'wss://pf-ja6x4lxt1nt3206ohn7w.cedalo.cloud:443/mqtt',
-    clientId: 'Web_Cedalo',
+    clientId: 'Web',
     username: 'Web',
     password: 's',
   },
@@ -102,9 +102,10 @@ export default function App() {
   };
 
   const logsEndRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logs]);
+  // Auto-scroll disabled per user request
+  // useEffect(() => {
+  //  logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // }, [logs]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans p-4 md:p-8 flex flex-col items-center">
@@ -132,7 +133,7 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex flex-col items-end mr-2 hidden sm:flex">
+            <div className="flex flex-col items-end mr-2">
                 <span className="text-xs text-slate-400 uppercase font-bold">Active Broker</span>
                 <div className="flex items-center gap-1">
                   <select 
