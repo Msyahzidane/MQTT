@@ -11,10 +11,11 @@ import { BrokerConfig } from './types';
 const BROKERS_PRESETS: BrokerConfig[] = [
   {
     label: 'Ably',
-    url: 'wss://mqtt.ably.io:443',
+    url: typeof window !== 'undefined' ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ably-mqtt-proxy` : 'wss://mqtt.ably.io',
     clientId: 'ESP_WEB_Ably',
     username: 'ZyRtEA.EIl0MA',
     password: 'jN4OHGaVHf2rbXzVYZGSmdfwWQJq7LBrvmP1H_0xkVM',
+    protocolVersion: 4,
   },
   {
     label: 'Cedalo',
