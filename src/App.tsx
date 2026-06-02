@@ -82,17 +82,22 @@ export default function App() {
 
   // Auto-connect to CloudAMQP on mount
   useEffect(() => {
-    connect(BROKERS_PRESETS[2]);
+    connect(BROKERS_PRESETS[2]); // Default to CloudAMQP
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleBrokerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const idx = parseInt(e.target.value);
-    setSelectedBrokerIdx(idx);
-    disconnect();
-    connect(BROKERS_PRESETS[idx]);
-    // Also instruct ESP to switch to keep them synced
+    
+    // Publish to the CURRENT broker so the ESP knows to switch
     publish('kontrol/broker', idx.toString());
+
+    // Allow a brief moment for the message to be sent before disconnecting
+    setTimeout(() => {
+      setSelectedBrokerIdx(idx);
+      disconnect();
+      connect(BROKERS_PRESETS[idx]);
+    }, 500);
   };
 
   const logsEndRef = useRef<HTMLDivElement>(null);
