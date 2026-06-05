@@ -46,16 +46,31 @@ export function useVoiceCommand(onCommandParsed: (command: string, transcript: s
     return recognitionRef.current;
   }, [onLog]);
 
-  const startListening = useCallback(() => {
+  const startListening = useCallback(async () => {
+    // Meminta izin mikrofon secara eksplisit jika belum
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
+    } catch (err: any) {
+      onLog(`Izin mikrofon ditolak: ${err.message}`, 'error');
+      return;
+    }
+
     const recognition = initRecognition();
     if (recognition) {
       try {
         recognition.start();
-      } catch (err) {
-        console.error(err);
+      } catch (err: any) {
+        if (err.name === 'InvalidStateError') {
+          // Already started, ignore
+        } else {
+          console.error(err);
+          onLog(`Error start recognition: ${err.message}`, 'error');
+        }
       }
     }
-  }, [initRecognition]);
+  }, [initRecognition, onLog]);
 
   const parseCommand = (transcript: string) => {
     // 1. Suhu & Kelembaban
